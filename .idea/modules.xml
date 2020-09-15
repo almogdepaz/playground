@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/roi.iml" filepath="$PROJECT_DIR$/.idea/roi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/roi_monitor.iml" filepath="$PROJECT_DIR$/.idea/roi_monitor.iml" />
     </modules>
   </component>
 </project>
