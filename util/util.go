@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"encoding/gob"
 	"encoding/hex"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -9,6 +10,7 @@ import (
 	"github.com/shopspring/decimal"
 	"golang.org/x/crypto/sha3"
 	"math/big"
+	"os"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -73,7 +75,6 @@ func ToDecimal(ivalue interface{}, decimals int64) decimal.Decimal {
 	return result
 }
 
-
 // CalcGasCost calculate gas cost given gas limit (units) and gas price (wei)
 func CalcGasCost(gasLimit uint64, gasPrice *big.Int) *big.Int {
 	gasLimitBig := big.NewInt(int64(gasLimit))
@@ -125,4 +126,24 @@ func clean(newNum string) string {
 		newNum = "0" + newNum
 	}
 	return newNum
+}
+
+func WriteGob(filePath string, object interface{}) error {
+	file, err := os.Create(filePath)
+	if err == nil {
+		encoder := gob.NewEncoder(file)
+		encoder.Encode(object)
+	}
+	file.Close()
+	return err
+}
+
+func ReadGob(filePath string, object interface{}) error {
+	file, err := os.Open(filePath)
+	if err == nil {
+		decoder := gob.NewDecoder(file)
+		err = decoder.Decode(object)
+	}
+	file.Close()
+	return err
 }

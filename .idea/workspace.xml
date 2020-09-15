@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BranchesTreeState">
-    <expand />
-    <select />
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </select>
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bc0cf6fa-9bb6-4b53-b53c-0d3d6bc06354" name="Default Changelist" comment="msg">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/util.go" beforeDir="false" afterPath="$PROJECT_DIR$/util/util.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,7 +60,7 @@
     <property name="configurable.Project.GOPATH.is.expanded" value="true" />
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.goide.configuration.GoLibrariesConfigurableProvider" />
   </component>
   <component name="RecentsManager">
@@ -107,7 +119,7 @@
             <State>
               <option name="CUSTOM_BOOLEAN_PROPERTIES">
                 <map>
-                  <entry key="Show.Git.Branches" value="false" />
+                  <entry key="Show.Git.Branches" value="true" />
                 </map>
               </option>
             </State>
@@ -119,7 +131,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="msg" />
-    <option name="LAST_COMMIT_MESSAGE" value="msg" />
+    <MESSAGE value="remove abi file" />
+    <option name="LAST_COMMIT_MESSAGE" value="remove abi file" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
@@ -149,10 +162,10 @@
       <screen x="0" y="0" width="1280" height="680" />
     </state>
     <state x="509" y="91" key="EnvironmentVariablesDialog/0.0.1280.680@0.0.1280.680" timestamp="1600006612500" />
-    <state x="421" y="95" key="FileChooserDialogImpl" timestamp="1600175235404">
+    <state x="421" y="95" key="FileChooserDialogImpl" timestamp="1600175781108">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
-    <state x="421" y="95" key="FileChooserDialogImpl/0.0.1280.680@0.0.1280.680" timestamp="1600175235404" />
+    <state x="421" y="95" key="FileChooserDialogImpl/0.0.1280.680@0.0.1280.680" timestamp="1600175781108" />
     <state x="520" y="239" key="Github.ShareDialog" timestamp="1600174513238">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
@@ -213,14 +226,18 @@
       <screen x="0" y="0" width="1280" height="680" />
     </state>
     <state x="142" y="0" key="SettingsEditor/0.0.1280.680@0.0.1280.680" timestamp="1600175167004" />
-    <state x="233" y="74" key="Vcs.Push.Dialog.v2" timestamp="1600175138834">
+    <state x="233" y="74" key="Vcs.Push.Dialog.v2" timestamp="1600177236248">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
-    <state x="233" y="74" key="Vcs.Push.Dialog.v2/0.0.1280.680@0.0.1280.680" timestamp="1600175138834" />
+    <state x="233" y="74" key="Vcs.Push.Dialog.v2/0.0.1280.680@0.0.1280.680" timestamp="1600177236248" />
     <state x="347" y="73" width="587" height="592" key="find.popup" timestamp="1600165587690">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
     <state x="347" y="73" width="587" height="592" key="find.popup/0.0.1280.680@0.0.1280.680" timestamp="1600165587690" />
+    <state x="457" y="235" key="git4idea.ui.GitResetDialog" timestamp="1600175809129">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state x="457" y="235" key="git4idea.ui.GitResetDialog/0.0.1280.680@0.0.1280.680" timestamp="1600175809129" />
     <state x="303" y="1" width="672" height="678" key="search.everywhere.popup" timestamp="1600164962136">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
@@ -241,7 +258,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/main.go</url>
-          <line>73</line>
+          <line>71</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
       </breakpoints>

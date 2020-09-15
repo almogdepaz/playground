@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/gob"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -11,7 +10,6 @@ import (
 	"github.com/shopspring/decimal"
 	"log"
 	"math/big"
-	"os"
 	"regexp"
 	"roi/erc20"
 	"roi/uniswap"
@@ -24,7 +22,7 @@ type MyClient struct {
 
 const node = "https://mainnet.infura.io/v3/093f1d19defd46248d24aa7e734ea203"
 
-const account = "0xf4721f8cc66436456f2230764d91782f7c09be8d"
+const account = "0xf4721f8cc66436456f2230764d91782f7c09be8r"
 
 const decimals = 18
 
@@ -66,7 +64,7 @@ func main() {
 
 	var lps []uniswap.LP
 
-	err := readGob("./uni_listings.gob", &lps)
+	err := util.ReadGob("./uni_listings.gob", &lps)
 	if err != nil {
 		fmt.Println("err reading uniswap data from disk,", err)
 	}
@@ -117,7 +115,7 @@ func fetchAndPersist(index int) {
 		panic("failed pulling token data from uniswap contract")
 	}
 
-	err = writeGob("./uni_listings.gob", lps)
+	err = util.WriteGob("./uni_listings.gob", lps)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -132,6 +130,11 @@ func tokenStats(tokenAddress common.Address) *erc20.TokenBalance {
 	}
 
 	return instance
+}
+
+//todo get token balances and relevant pairs through tx history
+func PrintAccountTXHistory(tokenAddress common.Address) {
+
 }
 
 func printStats(instance *erc20.TokenBalance) {
@@ -150,24 +153,4 @@ func ethBalance() (*big.Int, error) {
 
 	fmt.Printf("\n%s eth balance is %v", account, util.ToDecimal(bal, decimals))
 	return bal, err
-}
-
-func writeGob(filePath string, object interface{}) error {
-	file, err := os.Create(filePath)
-	if err == nil {
-		encoder := gob.NewEncoder(file)
-		encoder.Encode(object)
-	}
-	file.Close()
-	return err
-}
-
-func readGob(filePath string, object interface{}) error {
-	file, err := os.Open(filePath)
-	if err == nil {
-		decoder := gob.NewDecoder(file)
-		err = decoder.Decode(object)
-	}
-	file.Close()
-	return err
 }
