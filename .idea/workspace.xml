@@ -17,7 +17,15 @@
   <component name="ChangeListManager">
     <list default="true" id="bc0cf6fa-9bb6-4b53-b53c-0d3d6bc06354" name="Default Changelist" comment="msg">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erc20/token.go" beforeDir="false" afterPath="$PROJECT_DIR$/erc20/token.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erc20/tokenBalance.go" beforeDir="false" afterPath="$PROJECT_DIR$/erc20/tokenBalance.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/roi.exe" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uniswap/factory.go" beforeDir="false" afterPath="$PROJECT_DIR$/uniswap/factory.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/uniswap/pair.go" beforeDir="false" afterPath="$PROJECT_DIR$/uniswap/pair.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/uniswap/uniswap.go" beforeDir="false" afterPath="$PROJECT_DIR$/uniswap/uniswap.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/util/util.go" beforeDir="false" afterPath="$PROJECT_DIR$/util/util.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -54,6 +62,7 @@
     <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="GO_FMT" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="configurable.Global.GOPATH.is.expanded" value="true" />
     <property name="configurable.Module.GOPATH.is.expanded" value="false" />
@@ -61,7 +70,7 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.goide.configuration.GoLibrariesConfigurableProvider" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -81,15 +90,6 @@
       <directory value="$PROJECT_DIR$" />
       <method v="2" />
     </configuration>
-    <configuration name="go build roi" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
-      <module name="roi_monitor" />
-      <working_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <filePath value="$PROJECT_DIR$/main.go" />
-      <package value="roi" />
-      <directory value="$PROJECT_DIR$" />
-      <method v="2" />
-    </configuration>
     <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
       <module name="roi_monitor" />
       <working_directory value="$PROJECT_DIR$" />
@@ -101,13 +101,27 @@
       <filePath value="$PROJECT_DIR$" />
       <method v="2" />
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Go Build.go build roi" />
-      </list>
-    </recent_temporary>
+    <configuration name="go build roi" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="roi_monitor" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <filePath value="$PROJECT_DIR$/main.go" />
+      <package value="roi" />
+      <directory value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <created>1644145139328</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1644145139328</updated>
+      <workItem from="1644145141822" duration="746000" />
+    </task>
+    <servers />
+  </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
@@ -136,132 +150,5 @@
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="433" y="272" key="#GOROOT" timestamp="1599916127803">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="433" y="272" key="#GOROOT/0.0.1280.680@0.0.1280.680" timestamp="1599916127803" />
-    <state x="433" y="174" key="#Go_Modules" timestamp="1600083434009">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="433" y="174" key="#Go_Modules/0.0.1280.680@0.0.1280.680" timestamp="1600083434009" />
-    <state x="96" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1600006618710">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="96" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1280.680@0.0.1280.680" timestamp="1600006618710" />
-    <state x="410" y="143" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1600159368610">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="410" y="143" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1280.680@0.0.1280.680" timestamp="1600159368610" />
-    <state width="730" height="466" key="DebuggerActiveHint" timestamp="1600162852688">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="730" height="466" key="DebuggerActiveHint/0.0.1280.680@0.0.1280.680" timestamp="1600162852688" />
-    <state x="509" y="91" key="EnvironmentVariablesDialog" timestamp="1600006612500">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="509" y="91" key="EnvironmentVariablesDialog/0.0.1280.680@0.0.1280.680" timestamp="1600006612500" />
-    <state x="421" y="95" key="FileChooserDialogImpl" timestamp="1600175781108">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="421" y="95" key="FileChooserDialogImpl/0.0.1280.680@0.0.1280.680" timestamp="1600175781108" />
-    <state x="520" y="239" key="Github.ShareDialog" timestamp="1600174513238">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="520" y="239" key="Github.ShareDialog/0.0.1280.680@0.0.1280.680" timestamp="1600174513238" />
-    <state x="495" y="46" key="Github.UntrackedFilesDialog" timestamp="1600174143348">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="495" y="46" key="Github.UntrackedFilesDialog/0.0.1280.680@0.0.1280.680" timestamp="1600174143348" />
-    <state width="1237" height="280" key="GridCell.Tab.-1.bottom" timestamp="1600160331902">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="280" key="GridCell.Tab.-1.bottom/0.0.1280.680@0.0.1280.680" timestamp="1600160331902" />
-    <state width="1237" height="280" key="GridCell.Tab.-1.center" timestamp="1600160331902">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="280" key="GridCell.Tab.-1.center/0.0.1280.680@0.0.1280.680" timestamp="1600160331902" />
-    <state width="1237" height="280" key="GridCell.Tab.-1.left" timestamp="1600160331902">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="280" key="GridCell.Tab.-1.left/0.0.1280.680@0.0.1280.680" timestamp="1600160331902" />
-    <state width="1237" height="280" key="GridCell.Tab.-1.right" timestamp="1600160331902">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="280" key="GridCell.Tab.-1.right/0.0.1280.680@0.0.1280.680" timestamp="1600160331902" />
-    <state width="1237" height="173" key="GridCell.Tab.0.bottom" timestamp="1600175047007">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="173" key="GridCell.Tab.0.bottom/0.0.1280.680@0.0.1280.680" timestamp="1600175047007" />
-    <state width="1237" height="173" key="GridCell.Tab.0.center" timestamp="1600175047007">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="173" key="GridCell.Tab.0.center/0.0.1280.680@0.0.1280.680" timestamp="1600175047007" />
-    <state width="1237" height="173" key="GridCell.Tab.0.left" timestamp="1600175047007">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="173" key="GridCell.Tab.0.left/0.0.1280.680@0.0.1280.680" timestamp="1600175047007" />
-    <state width="1237" height="173" key="GridCell.Tab.0.right" timestamp="1600175047007">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="173" key="GridCell.Tab.0.right/0.0.1280.680@0.0.1280.680" timestamp="1600175047007" />
-    <state width="1237" height="173" key="GridCell.Tab.1.bottom" timestamp="1600175047008">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="173" key="GridCell.Tab.1.bottom/0.0.1280.680@0.0.1280.680" timestamp="1600175047008" />
-    <state width="1237" height="173" key="GridCell.Tab.1.center" timestamp="1600175047007">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="173" key="GridCell.Tab.1.center/0.0.1280.680@0.0.1280.680" timestamp="1600175047007" />
-    <state width="1237" height="173" key="GridCell.Tab.1.left" timestamp="1600175047007">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="173" key="GridCell.Tab.1.left/0.0.1280.680@0.0.1280.680" timestamp="1600175047007" />
-    <state width="1237" height="173" key="GridCell.Tab.1.right" timestamp="1600175047007">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="173" key="GridCell.Tab.1.right/0.0.1280.680@0.0.1280.680" timestamp="1600175047007" />
-    <state x="142" y="0" key="SettingsEditor" timestamp="1600175167004">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="142" y="0" key="SettingsEditor/0.0.1280.680@0.0.1280.680" timestamp="1600175167004" />
-    <state x="233" y="74" key="Vcs.Push.Dialog.v2" timestamp="1600177236248">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="233" y="74" key="Vcs.Push.Dialog.v2/0.0.1280.680@0.0.1280.680" timestamp="1600177236248" />
-    <state x="347" y="73" width="587" height="592" key="find.popup" timestamp="1600165587690">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="347" y="73" width="587" height="592" key="find.popup/0.0.1280.680@0.0.1280.680" timestamp="1600165587690" />
-    <state x="457" y="235" key="git4idea.ui.GitResetDialog" timestamp="1600175809129">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="457" y="235" key="git4idea.ui.GitResetDialog/0.0.1280.680@0.0.1280.680" timestamp="1600175809129" />
-    <state x="303" y="1" width="672" height="678" key="search.everywhere.popup" timestamp="1600164962136">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="303" y="1" width="672" height="678" key="search.everywhere.popup/0.0.1280.680@0.0.1280.680" timestamp="1600164962136" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/uniswap/factory.go</url>
-          <line>207</line>
-          <option name="timeStamp" value="8" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/uniswap/uniswap.go</url>
-          <line>80</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/main.go</url>
-          <line>71</line>
-          <option name="timeStamp" value="19" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

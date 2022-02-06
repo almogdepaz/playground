@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"log"
 	"math/big"
-	"roi/util"
+	"price_monitor/util"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 type TokenBalance struct {
@@ -61,7 +62,7 @@ func (tb *TokenBalance) BalanceString() string {
 func (tb *TokenBalance) query(client *ethclient.Client) error {
 	var err error
 
-	token, err := newTokenCaller(tb.Contract, client)
+	token, err := NewUniswapv2erc20Caller(tb.Contract, client)
 	if err != nil {
 		log.Println(fmt.Sprintf("Failed to instantiate a token contract: %v\n", err), false)
 		return err
@@ -79,7 +80,7 @@ func (tb *TokenBalance) query(client *ethclient.Client) error {
 		log.Println(fmt.Sprintf("Failed to get decimals from contract: %v \n", tb.Contract.String()), false)
 		return err
 	}
-	tb.Decimals = decimals.Int64()
+	tb.Decimals = int64(decimals)
 
 	tb.ETH, err = client.BalanceAt(tb.ctx, tb.Wallet, nil)
 	if err != nil {

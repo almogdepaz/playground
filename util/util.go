@@ -4,17 +4,29 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/shopspring/decimal"
-	"golang.org/x/crypto/sha3"
+	"log"
 	"math/big"
 	"os"
 	"reflect"
 	"regexp"
 	"strconv"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/shopspring/decimal"
+	"golang.org/x/crypto/sha3"
 )
+
+func GetClient(node string) *ethclient.Client {
+	cl, err := ethclient.Dial(node)
+	if err != nil {
+		log.Panic("cannot connect to node", err)
+	}
+	return cl
+}
 
 // PublicKeyBytesToAddress ...
 func PublicKeyBytesToAddress(publicKey []byte) common.Address {
@@ -146,4 +158,37 @@ func ReadGob(filePath string, object interface{}) error {
 	}
 	file.Close()
 	return err
+}
+
+func SortAddressess(tkn0, tkn1 common.Address) (common.Address, common.Address) {
+	token0Rep := big.NewInt(0).SetBytes(tkn0.Bytes())
+	token1Rep := big.NewInt(0).SetBytes(tkn1.Bytes())
+
+	if token0Rep.Cmp(token1Rep) > 0 {
+		tkn0, tkn1 = tkn1, tkn0
+	}
+
+	return tkn0, tkn1
+}
+
+type TokenBalance struct {
+	Name     string `json:"Name"`
+	Symbol   string `json:"Symbol"`
+	Balance  string `json:"Balance"`
+	Decimals string `json:"Decimals"`
+}
+
+func printStats(instance interface{}) {
+	var tokenBalance TokenBalance
+	inrec, _ := json.Marshal(instance)
+	json.Unmarshal(inrec, &tokenBalance)
+	fmt.Printf("name: %s\n", tokenBalance.Name)
+	fmt.Printf("symbol: %s\n", tokenBalance.Symbol)
+	fmt.Printf("decimals: %v\n", tokenBalance.Decimals)
+	s := tokenBalance.Decimals
+	i, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("token balance is: %s\n", ToDecimal(tokenBalance.Balance, i).String())
 }
