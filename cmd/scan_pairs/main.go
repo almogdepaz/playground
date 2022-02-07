@@ -23,7 +23,7 @@ type MyClient struct {
 
 const node = "https://mainnet.infura.io/v3/093f1d19defd46248d24aa7e734ea203"
 
-const account = "0xf4721f8cc66436456f2230764d91782f7c09be8r"
+const account = "0x4995F8B55b16A2E4Bb423f77907e94b9790dC0a2"
 
 const decimals = 18
 

@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/big"
 	"price_monitor/util"
+	"runtime"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -14,6 +15,7 @@ import (
 )
 
 const factory = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
+const node = "https://mainnet.infura.io/v3/093f1d19defd46248d24aa7e734ea203" // Todo move to constants
 
 type LP struct {
 	Lp common.Address
@@ -66,28 +68,56 @@ func GetPairMeta(client *ethclient.Client, pairs []common.Address, op *bind.Call
 
 func GetAllPairs(client *ethclient.Client, index int, op *bind.CallOpts) ([]common.Address, error) {
 	var err error
-
-	token, err := NewUniswapv2factoryCaller(common.HexToAddress(factory), client)
+	caller, err := NewUniswapv2factoryCaller(common.HexToAddress(factory), client)
 	if err != nil {
 		log.Println(fmt.Sprintf("Failed to instantiate a token contract: %v\n", err), false)
 		return nil, err
 	}
-
-	ln, err := token.AllPairsLength(op)
+	ln, err := caller.AllPairsLength(op)
 	if err != nil {
 		panic(err)
 	}
 
+	c := make(chan int64)
+	resChan := make(chan common.Address)
+	for i := 0; i < runtime.GOMAXPROCS(0); i++ {
+		go pairWorker(c, resChan, ln, op)
+	}
+
+	go func() {
+		for i := int64(index); i < ln.Int64(); i++ {
+			c <- i
+		}
+	}()
+
 	var lps []common.Address
-	for i := int64(index); i < ln.Int64(); i++ {
-		tk, err := token.AllPairs(op, big.NewInt(i))
+	set := make(map[common.Address]bool)
+	for addr := range resChan {
+		lps = append(lps, addr)
+		if val, ok := set[addr]; ok {
+			log.Panic(fmt.Sprintf("value %v already in set", val))
+		}
+		set[addr] = true
+		fmt.Printf("\nGetAllPairs %d out of %d", len(lps), ln.Int64())
+	}
+
+	return lps, nil
+}
+
+func pairWorker(c chan int64, resChan chan common.Address, ln *big.Int, op *bind.CallOpts) {
+	log.Println("start pair worker")
+	client := util.GetClient(node)
+	caller, err := NewUniswapv2factoryCaller(common.HexToAddress(factory), client)
+	if err != nil {
+		log.Panic(fmt.Sprintf("Failed to instantiate a token contract: %v\n", err), false)
+	}
+	for i := range c {
+		tk, err := caller.AllPairs(op, big.NewInt(i))
 		if err != nil {
 			panic(err)
 		}
-		lps = append(lps, tk)
-		fmt.Println(fmt.Sprintf("GetAllPairs %d out of %d", i, ln.Int64()))
+		resChan <- tk
 	}
-	return lps, nil
 }
 
 // GetReserves retursn the available reserves in a pair
