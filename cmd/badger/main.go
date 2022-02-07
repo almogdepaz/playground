@@ -16,8 +16,6 @@ import (
 
 const node = "https://mainnet.infura.io/v3/093f1d19defd46248d24aa7e734ea203"
 
-const account = "0xf4721f8cc66436456f2230764d91782f7c09be8r"
-
 const decimals = 18
 
 var Client *ethclient.Client
@@ -25,7 +23,6 @@ var Client *ethclient.Client
 func init() { Client = util.GetClient(node) }
 
 func main() {
-
 	addr1 := common.HexToAddress("0xE86204c4eDDd2f70eE00EAd6805f917671F56c52") //Uniswap WBTC/DIGG LP (UNI-V2)
 	pair, err := uniswap.NewUniswapv2pairCaller(addr1, Client)
 	if err != nil {
@@ -34,7 +31,7 @@ func main() {
 
 	for i := 0; i < 10; i++ {
 		res := FetchPoolStatsUniswap(pair, i)
-		fmt.Println(fmt.Sprintf(" WBTC/DIGG amount in %v ammount out %v", res))
+		fmt.Printf("\nWBTC/DIGG amount in %v ammount out %v", i, res)
 	}
 	addr2 := common.HexToAddress("0x0F92Ca0fB07E420b2fED036A6bB023c6c9e49940") //badger contract
 
@@ -46,7 +43,7 @@ func main() {
 	if err != nil {
 		log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
 	}
-	log.Println("Badger digg price %v", price)
+	fmt.Printf("Badger digg price %v", price)
 }
 
 // amount - the amount of token0 to send

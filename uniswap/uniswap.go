@@ -14,19 +14,16 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-const factory = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
-const node = "https://mainnet.infura.io/v3/093f1d19defd46248d24aa7e734ea203" // Todo move to constants
-
 type LP struct {
 	Lp common.Address
 	T0 common.Address
 	T1 common.Address
 }
 
-func PullDataFromUniswap(client *ethclient.Client, index int, op *bind.CallOpts) ([]LP, error) {
+func PullDataFromUniswap(client *ethclient.Client, index int, op *bind.CallOpts, factory string, node string) ([]LP, error) {
 	var err error
 
-	lpAddress, err := GetAllPairs(client, index, op)
+	lpAddress, err := GetAllPairs(client, index, op, factory, node)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +63,7 @@ func GetPairMeta(client *ethclient.Client, pairs []common.Address, op *bind.Call
 	return lps, err
 }
 
-func GetAllPairs(client *ethclient.Client, index int, op *bind.CallOpts) ([]common.Address, error) {
+func GetAllPairs(client *ethclient.Client, index int, op *bind.CallOpts, factory string, node string) ([]common.Address, error) {
 	var err error
 	caller, err := NewUniswapv2factoryCaller(common.HexToAddress(factory), client)
 	if err != nil {
@@ -81,7 +78,7 @@ func GetAllPairs(client *ethclient.Client, index int, op *bind.CallOpts) ([]comm
 	c := make(chan int64)
 	resChan := make(chan common.Address)
 	for i := 0; i < runtime.GOMAXPROCS(0); i++ {
-		go pairWorker(c, resChan, ln, op)
+		go pairWorker(c, resChan, ln, op, factory, node)
 	}
 
 	go func() {
@@ -91,21 +88,15 @@ func GetAllPairs(client *ethclient.Client, index int, op *bind.CallOpts) ([]comm
 	}()
 
 	var lps []common.Address
-	set := make(map[common.Address]bool)
 	for addr := range resChan {
 		lps = append(lps, addr)
-		if val, ok := set[addr]; ok {
-			log.Panic(fmt.Sprintf("value %v already in set", val))
-		}
-		set[addr] = true
 		fmt.Printf("\nGetAllPairs %d out of %d", len(lps), ln.Int64())
 	}
 
 	return lps, nil
 }
 
-func pairWorker(c chan int64, resChan chan common.Address, ln *big.Int, op *bind.CallOpts) {
-	log.Println("start pair worker")
+func pairWorker(c chan int64, resChan chan common.Address, ln *big.Int, op *bind.CallOpts, factory string, node string) {
 	client := util.GetClient(node)
 	caller, err := NewUniswapv2factoryCaller(common.HexToAddress(factory), client)
 	if err != nil {

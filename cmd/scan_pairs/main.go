@@ -22,8 +22,7 @@ type MyClient struct {
 }
 
 const node = "https://mainnet.infura.io/v3/093f1d19defd46248d24aa7e734ea203"
-
-const account = "0x4995F8B55b16A2E4Bb423f77907e94b9790dC0a2"
+const uniswapFactory = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
 
 const decimals = 18
 
@@ -55,12 +54,24 @@ func (cl MyClient) checkIsContract(address string) (bool, error) {
 
 func main() {
 	fmt.Printf("\n--------------start--------------\n")
-	if !util.IsValidAddress(account) {
-		log.Panic("invalid address")
-	}
+
+	// fmt.Print("Enter text: ")
+	// reader := bufio.NewReader(os.Stdin)
+	// // ReadString will block until the delimiter is entered
+	// input, err := reader.ReadString('\n')
+	// if err != nil {
+	// 	fmt.Println("An error occured while reading input. Please try again", err)
+	// 	return
+	// }
+
+	// // remove the delimeter from the string
+	// account := strings.TrimSuffix(input, "\n")
+	// if !util.IsValidAddress(account) {
+	// 	log.Panic("invalid address")
+	// }
 
 	var lps []uniswap.LP
-
+	account := ""
 	err := util.ReadGob("./uni_listings.gob", &lps)
 	if err != nil {
 		fmt.Println("err reading uniswap data from disk,", err)
@@ -74,7 +85,7 @@ func main() {
 	for _, t := range lps {
 
 		if _, ok := visited[t.Lp]; !ok {
-			st := tokenStats(t.Lp)
+			st := tokenStats(t.Lp, account)
 			if util.ToDecimal(st.Balance, decimals).GreaterThan(decimal.Zero) {
 				stats = append(stats, st)
 				printStats(st)
@@ -82,7 +93,7 @@ func main() {
 			visited[t.Lp] = struct{}{}
 		}
 		if _, ok := visited[t.T0]; !ok {
-			st1 := tokenStats(t.T0)
+			st1 := tokenStats(t.T0, account)
 			if util.ToDecimal(st1.Balance, decimals).GreaterThan(decimal.Zero) {
 				stats = append(stats, st1)
 				printStats(st1)
@@ -90,7 +101,7 @@ func main() {
 			visited[t.T0] = struct{}{}
 		}
 		if _, ok := visited[t.T1]; !ok {
-			st2 := tokenStats(t.T1)
+			st2 := tokenStats(t.T1, account)
 			if util.ToDecimal(st2.Balance, decimals).GreaterThan(decimal.Zero) {
 				stats = append(stats, st2)
 				printStats(st2)
@@ -107,7 +118,7 @@ func fetchAndPersist(index int) {
 	if index > 0 {
 		fmt.Println(fmt.Sprintf("starting from index %d", index))
 	}
-	lps, err := uniswap.PullDataFromUniswap(Client.Client, index, &bind.CallOpts{Context: context.TODO()})
+	lps, err := uniswap.PullDataFromUniswap(Client.Client, index, &bind.CallOpts{Context: context.TODO()}, uniswapFactory, node)
 	if err != nil {
 		panic("failed pulling token data from uniswap contract")
 	}
@@ -120,7 +131,7 @@ func fetchAndPersist(index int) {
 	}
 }
 
-func tokenStats(tokenAddress common.Address) *erc20.TokenBalance {
+func tokenStats(tokenAddress common.Address, account string) *erc20.TokenBalance {
 	instance, err := erc20.New(Client.Client, tokenAddress.String(), account)
 	if err != nil {
 		log.Fatal(err)
@@ -141,7 +152,7 @@ func printStats(instance *erc20.TokenBalance) {
 	fmt.Printf("token balance is: %s\n", util.ToDecimal(instance.Balance, decimals).String())
 }
 
-func ethBalance() (*big.Int, error) {
+func ethBalance(account string) (*big.Int, error) {
 	// print eth balance
 	bal, err := Client.getAccountBalance(account)
 	if err != nil {
