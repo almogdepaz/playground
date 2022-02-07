@@ -23,16 +23,24 @@ var Client *ethclient.Client
 func init() { Client = util.GetClient(node) }
 
 func main() {
-	addr1 := common.HexToAddress("0xE86204c4eDDd2f70eE00EAd6805f917671F56c52") //Uniswap WBTC/DIGG LP (UNI-V2)
-	pair, err := uniswap.NewUniswapv2pairCaller(addr1, Client)
+	amount := 10
+	uni_pool := common.HexToAddress("0xE86204c4eDDd2f70eE00EAd6805f917671F56c52")   //Uniswap WBTC/DIGG LP (UNI-V2)
+	sushi_pool := common.HexToAddress("0x9a13867048e01c663ce8ce2fe0cdae69ff9f35e3") //Sushiswap WBTC/DIGG LP (UNI-V2)
+
+	uni_pair, err := uniswap.NewUniswapv2pairCaller(uni_pool, Client)
 	if err != nil {
 		log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
 	}
+	uni_res := FetchPoolStatsUniswap(uni_pair, amount)
+	fmt.Printf("\nUniswap WBTC/DIGG amount in %v ammount out %v", amount, uni_res)
 
-	for i := 0; i < 10; i++ {
-		res := FetchPoolStatsUniswap(pair, i)
-		fmt.Printf("\nWBTC/DIGG amount in %v ammount out %v", i, res)
+	sushi_pair, err := uniswap.NewUniswapv2pairCaller(sushi_pool, Client)
+	if err != nil {
+		log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
 	}
+	sushi_res := FetchPoolStatsUniswap(sushi_pair, amount)
+	fmt.Printf("\nSushiswap WBTC/DIGG amount in %v ammount out %v", amount, sushi_res)
+
 	addr2 := common.HexToAddress("0x0F92Ca0fB07E420b2fED036A6bB023c6c9e49940") //badger contract
 
 	badger_caller, err := badger.NewBadgerCaller(addr2, Client)
@@ -43,7 +51,7 @@ func main() {
 	if err != nil {
 		log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
 	}
-	fmt.Printf("Badger digg price %v", price)
+	fmt.Printf("\nBadger digg share price %v", price)
 }
 
 // amount - the amount of token0 to send
