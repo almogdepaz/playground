@@ -92,7 +92,6 @@ func main() {
 
 		// wbtc to eth
 		sushiEthRes := FetchPoolStatsUniswap(sushiEthWbtcPool, wbtcRes, wbtc, weth)
-		log.Println(fmt.Sprintf("%v eth before parse", sushiEthRes))
 		log.Println(fmt.Sprintf("%v wbtc in get %v eth out", parseDecimalsFromInt(wbtcRes, decimals), parseDecimalsFromFloat(sushiEthRes, decimals)))
 		time.Sleep(interval)
 		log.Println("------------------------------------------------------------------------------------------")
