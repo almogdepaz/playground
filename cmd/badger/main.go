@@ -83,6 +83,17 @@ func main() {
 		if err != nil {
 			log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
 		}
+		supply, err := badger_caller.TotalSupply(&opts)
+		if err != nil {
+			log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
+		}
+
+		balance, err := badger_caller.Balance(&opts)
+		if err != nil {
+			log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
+		}
+
+		log.Println(fmt.Sprintf("supply %v balance %v price %v price2 %v", supply, balance, price))
 
 		parsedSharePrice := big.NewInt(price.Int64() / int64(1e18))
 		log.Println(fmt.Sprintf("bDIGG share price %v", parsedSharePrice))
