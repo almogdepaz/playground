@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
-	"log"
 	"math"
 	"math/big"
 	"os"
@@ -13,6 +13,8 @@ import (
 	uniswap "price_monitor/uniswap"
 	"price_monitor/util"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -69,20 +71,24 @@ func main() {
 		blockRes, err := Client.BlockNumber(context.TODO())
 		blockNumber = new(big.Int).SetUint64(blockRes)
 		if prev == blockNumber {
-			log.Println(fmt.Sprintf("last block %v, waiting for next block", blockNumber))
+			log.Info(fmt.Sprintf("last block %v, waiting for next block", blockNumber))
 			time.Sleep(interval)
 			continue
 		}
 
 		if err != nil {
-			log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
+			log.Error(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
 		}
 		// eth to bdigg
 		bancorRes := new(big.Float).SetInt64(FetchPoolStatsBancor(bancor_contract, bancorEth, bDigg, ethAmount, blockNumber).Int64())
-		sushiEthBdiggRes := FetchPoolStatsUniswap(sushiEthBdiggPool, ethAmount, weth, bDigg, std_decimals, std_decimals, blockNumber)
 
-		log.Println(fmt.Sprintf("bancor ETH/bDIGG %v eth in %v bdigg out", parseDecimalsFromInt(ethAmount, std_decimals), parseDecimalsFromFloat(bancorRes, std_decimals)))
-		log.Println(fmt.Sprintf("Sushiswap ETH/bDIGG %v eth in %v bdigg out", parseDecimalsFromInt(ethAmount, std_decimals), parseDecimalsFromFloat(sushiEthBdiggRes, std_decimals)))
+		sushiEthBdiggRes, err := FetchPoolStatsUniswap(sushiEthBdiggPool, ethAmount, weth, bDigg, std_decimals, std_decimals, blockNumber)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		log.Info(fmt.Sprintf("bancor ETH/bDIGG %v eth in %v bdigg out", parseDecimalsFromInt(ethAmount, std_decimals), parseDecimalsFromFloat(bancorRes, std_decimals)))
+		log.Info(fmt.Sprintf("Sushiswap ETH/bDIGG %v eth in %v bdigg out", parseDecimalsFromInt(ethAmount, std_decimals), parseDecimalsFromFloat(sushiEthBdiggRes, std_decimals)))
 		res := sushiEthBdiggRes
 		if res.Cmp(bancorRes) < 0 {
 			res = bancorRes
@@ -90,29 +96,39 @@ func main() {
 		// bdigg to digg
 		badger_caller, err := badger.NewBadgerCaller(badger_contract, Client)
 		if err != nil {
-			log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
+			log.Error(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
+			continue
 		}
 		supply, err := badger_caller.TotalSupply(&opts)
 		if err != nil {
-			log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
+			log.Error(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
+			continue
 		}
-
 		balance, err := badger_caller.Balance(&opts)
 		if err != nil {
-			log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
+			log.Error(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
+			continue
 		}
 
 		sharePrice := big.NewFloat(1 / (float64(new(big.Int).Div(supply, balance).Int64()) / 1e9))
-		log.Println(fmt.Sprintf("bDIGG share price %v", sharePrice))
+		log.Info(fmt.Sprintf("bDIGG share price %v", sharePrice))
 		diggOut, _ := new(big.Float).Mul(res, sharePrice).Int64()
 		diggOutputInt := big.NewInt(diggOut)
-		log.Println(fmt.Sprintf("Badger %v bDIGG in %v Digg out ", parseDecimalsFromFloat(res, std_decimals), parseDecimalsFromInt(diggOutputInt, std_decimals)))
+		log.Info(fmt.Sprintf("Badger %v bDIGG in %v Digg out ", parseDecimalsFromFloat(res, std_decimals), parseDecimalsFromInt(diggOutputInt, std_decimals)))
 
 		// digg to wbtc
-		uniWbtcRes := FetchPoolStatsUniswap(uniWbtcDiggPool, diggOutputInt, digg, wbtc, diggDecimals, wbtc_decimals, blockNumber)
-		sushiWbtcRes := FetchPoolStatsUniswap(sushiWbtcDiggPool, diggOutputInt, digg, wbtc, diggDecimals, wbtc_decimals, blockNumber)
-		log.Println(fmt.Sprintf("Uniswap WBTC/DIGG %v digg in %v  wbtc out", parseDecimalsFromInt(diggOutputInt, std_decimals), parseDecimalsFromFloat(uniWbtcRes, std_decimals)))
-		log.Println(fmt.Sprintf("Sushiswap WBTC/DIGG %v digg in %v  wbtc out", parseDecimalsFromInt(diggOutputInt, std_decimals), parseDecimalsFromFloat(sushiWbtcRes, std_decimals)))
+		uniWbtcRes, err := FetchPoolStatsUniswap(uniWbtcDiggPool, diggOutputInt, digg, wbtc, diggDecimals, wbtc_decimals, blockNumber)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		sushiWbtcRes, err := FetchPoolStatsUniswap(sushiWbtcDiggPool, diggOutputInt, digg, wbtc, diggDecimals, wbtc_decimals, blockNumber)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		log.Info(fmt.Sprintf("Uniswap WBTC/DIGG %v digg in %v  wbtc out", parseDecimalsFromInt(diggOutputInt, std_decimals), parseDecimalsFromFloat(uniWbtcRes, std_decimals)))
+		log.Info(fmt.Sprintf("Sushiswap WBTC/DIGG %v digg in %v  wbtc out", parseDecimalsFromInt(diggOutputInt, std_decimals), parseDecimalsFromFloat(sushiWbtcRes, std_decimals)))
 		wbtcRes := new(big.Int)
 		if uniWbtcRes.Cmp(sushiWbtcRes) < 0 {
 			sushiWbtcRes.Int(wbtcRes)
@@ -121,10 +137,18 @@ func main() {
 		}
 
 		// wbtc to eth
-		uniEthRes := FetchPoolStatsUniswap(uniEthWbtcPool, wbtcRes, wbtc, weth, wbtc_decimals, std_decimals, blockNumber)
-		sushiEthRes := FetchPoolStatsUniswap(sushiEthWbtcPool, wbtcRes, wbtc, weth, wbtc_decimals, std_decimals, blockNumber)
-		log.Println(fmt.Sprintf("Uniswap ETH/WBTC %v wbtc in %v eth out", parseDecimalsFromInt(wbtcRes, std_decimals), parseDecimalsFromFloat(uniEthRes, std_decimals)))
-		log.Println(fmt.Sprintf("Sushiswap ETH/WBTC  %v wbtc in %v eth out", parseDecimalsFromInt(wbtcRes, std_decimals), parseDecimalsFromFloat(sushiEthRes, std_decimals)))
+		uniEthRes, err := FetchPoolStatsUniswap(uniEthWbtcPool, wbtcRes, wbtc, weth, wbtc_decimals, std_decimals, blockNumber)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		sushiEthRes, err := FetchPoolStatsUniswap(sushiEthWbtcPool, wbtcRes, wbtc, weth, wbtc_decimals, std_decimals, blockNumber)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		log.Info(fmt.Sprintf("Uniswap ETH/WBTC %v wbtc in %v eth out", parseDecimalsFromInt(wbtcRes, std_decimals), parseDecimalsFromFloat(uniEthRes, std_decimals)))
+		log.Info(fmt.Sprintf("Sushiswap ETH/WBTC  %v wbtc in %v eth out", parseDecimalsFromInt(wbtcRes, std_decimals), parseDecimalsFromFloat(sushiEthRes, std_decimals)))
 		ethRes := new(big.Int)
 		if uniEthRes.Cmp(sushiEthRes) < 0 {
 			sushiWbtcRes.Int(ethRes)
@@ -132,17 +156,17 @@ func main() {
 			uniEthRes.Int(ethRes)
 		}
 
-		log.Println(fmt.Sprintf("%v wbtc in get %v eth out", parseDecimalsFromInt(wbtcRes, std_decimals), parseDecimalsFromInt(ethRes, std_decimals)))
+		log.Info(fmt.Sprintf("%v wbtc in get %v eth out", parseDecimalsFromInt(wbtcRes, std_decimals), parseDecimalsFromInt(ethRes, std_decimals)))
 		parsedEthIn := parseDecimalsFromInt(ethAmount, std_decimals)
 		parsedEthOut := parseDecimalsFromInt(ethRes, std_decimals)
-		log.Println(fmt.Sprintf("results %v eth in get %v eth out", parsedEthIn, parsedEthOut))
+		log.Info(fmt.Sprintf("results %v eth in get %v eth out", parsedEthIn, parsedEthOut))
 		delta := parsedEthOut - parsedEthIn
 		if delta > maxProfit {
 			maxProfit = delta
-			log.Println(fmt.Sprintf("found max profit %v ", delta))
+			log.Info(fmt.Sprintf("found max profit %v ", delta))
 		}
 		time.Sleep(interval)
-		log.Println("------------------------------------------------------------------------------------------")
+		log.Info("------------------------------------------------------------------------------------------")
 	}
 
 }
@@ -178,7 +202,8 @@ func FetchPoolStatsBancor(bancor_contract common.Address, from common.Address, t
 
 // amount - the amount of token0 to send
 // returns the recived amount of token1 given the input
-func FetchPoolStatsUniswap(pool common.Address, amount_in *big.Int, in common.Address, out common.Address, token0Decimals, token1Decimals int, blockNumber *big.Int) *big.Float {
+func FetchPoolStatsUniswap(pool common.Address, amount_in *big.Int, in common.Address,
+	out common.Address, token0Decimals, token1Decimals int, blockNumber *big.Int) (*big.Float, error) {
 
 	decimalDiff := math.Abs(float64(token0Decimals - token1Decimals))
 	if token0Decimals > token1Decimals {
@@ -187,14 +212,13 @@ func FetchPoolStatsUniswap(pool common.Address, amount_in *big.Int, in common.Ad
 		amount_in = new(big.Int).Quo(amount_in, big.NewInt(int64(math.Pow(10, decimalDiff))))
 
 	}
-
 	pair, err := uniswap.NewUniswapv2pairCaller(pool, Client)
 	if err != nil {
-		log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
+		return big.NewFloat(0), errors.New(fmt.Sprintf("Failed to instantiate pair caller: %v\n"))
 	}
 	amount1, err := uniswap.GetExchangeAmount(pair, new(big.Float).SetInt(amount_in), in, out, blockNumber)
 	if err != nil {
-		log.Panic(fmt.Sprintf("Failed to get exchange amount: %v\n", err))
+		return big.NewFloat(0), errors.New(fmt.Sprintf("Failed to get exchange amount: %v\n", err))
 	}
-	return amount1
+	return amount1, nil
 }
