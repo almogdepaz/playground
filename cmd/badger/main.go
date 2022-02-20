@@ -41,8 +41,8 @@ func main() {
 		log.Panic(err)
 	}
 	defer logFile.Close()
-	ethAmount := new(big.Int).Mul(big.NewInt(1), big.NewInt(int64(math.Pow(10, std_decimals))))
-	badger_contract := common.HexToAddress("0x0F92Ca0fB07E420b2fED036A6bB023c6c9e49940") //badger contract
+	ethAmount := new(big.Int).Mul(big.NewInt(1), big.NewInt(int64(1e18)))
+	badger_contract := common.HexToAddress("0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a") //badger contract
 	bancor_contract := common.HexToAddress("0x2F9EC37d6CcFFf1caB21733BdaDEdE11c823cCB0") //bancor contract
 
 	bancorEth := common.HexToAddress("0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") //null addr for bancor eth
@@ -60,6 +60,7 @@ func main() {
 	log.SetOutput(mw)
 	for {
 		prev := blockNumber
+		opts := bind.CallOpts{Context: context.TODO()}
 		blockNumber, err = Client.BlockNumber(context.TODO())
 		if prev == blockNumber {
 			log.Println(fmt.Sprintf("last block %v, waiting for next block", blockNumber))
@@ -78,13 +79,12 @@ func main() {
 		if err != nil {
 			log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
 		}
-		price, err := badger_caller.GetPricePerFullShare(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(blockNumber), Context: context.TODO()})
+		price, err := badger_caller.GetPricePerFullShare(&opts)
 		if err != nil {
 			log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
 		}
 
-		// parsedSharePrice := big.NewInt(price.Int64() / int64(math.Pow(10, std_decimals)))
-		parsedSharePrice := big.NewInt(price.Int64() / int64(math.Pow(10, std_decimals)))
+		parsedSharePrice := big.NewInt(price.Int64() / int64(1e18))
 		log.Println(fmt.Sprintf("bDIGG share price %v", parsedSharePrice))
 		diggOut := new(big.Int).Mul(bancorRes, parsedSharePrice)
 		log.Println(fmt.Sprintf("Badger %v bDIGG in %v Digg out ", parseDecimalsFromInt(bancorRes, std_decimals), parseDecimalsFromInt(diggOut, std_decimals)))
