@@ -202,7 +202,7 @@ func pairWorker(c chan int64, resChan chan common.Address, ln *big.Int, op *bind
 }
 
 // GetReserves retursn the available reserves in a pair
-func GetReserves(caller *Uniswapv2pairCaller, token0, token1 common.Address, blockNumber uint64) (*struct {
+func GetReserves(caller *Uniswapv2pairCaller, token0, token1 common.Address, blockNumber *big.Int) (*struct {
 	Reserve0           *big.Int
 	Reserve1           *big.Int
 	BlockTimestampLast uint32
@@ -210,9 +210,7 @@ func GetReserves(caller *Uniswapv2pairCaller, token0, token1 common.Address, blo
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
-	reserves, err := caller.GetReserves(&bind.CallOpts{BlockNumber: new(big.Int).SetUint64(blockNumber),
-		Context: ctx,
-	})
+	reserves, err := caller.GetReserves(&bind.CallOpts{BlockNumber: blockNumber, Context: ctx})
 	if err != nil {
 		return nil, err
 	}
@@ -228,7 +226,7 @@ func GetReserves(caller *Uniswapv2pairCaller, token0, token1 common.Address, blo
 }
 
 // GetExchangeAmount returns the amount of tokens you'd receive when exchanging the given amount of token0 to token1.
-func GetExchangeAmount(caller *Uniswapv2pairCaller, amount *big.Float, token0, token1 common.Address, blockNumber uint64) (*big.Float, error) {
+func GetExchangeAmount(caller *Uniswapv2pairCaller, amount *big.Float, token0, token1 common.Address, blockNumber *big.Int) (*big.Float, error) {
 	reserves, err := GetReserves(caller, token0, token1, blockNumber)
 	if err != nil {
 		return nil, err
