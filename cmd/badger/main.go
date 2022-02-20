@@ -7,10 +7,12 @@ import (
 	"math"
 	"math/big"
 	"os"
+	"os/signal"
 	"price_monitor/badger"
 	"price_monitor/bancor"
 	uniswap "price_monitor/uniswap"
 	"price_monitor/util"
+	"syscall"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -64,6 +66,16 @@ func main() {
 	blockNumber := big.NewInt(0)
 	log.SetOutput(mw)
 	maxProfit := float64(0)
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	// print profit before exit
+	go func() {
+		<-c
+		fmt.Printf("\n max profit %v", maxProfit)
+		os.Exit(0)
+	}()
+
 	for {
 		prev := blockNumber
 		opts := bind.CallOpts{Context: context.TODO()}
@@ -79,8 +91,11 @@ func main() {
 			log.Error(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
 		}
 		// eth to bdigg
-		bancorRes := new(big.Float).SetInt64(FetchPoolStatsBancor(bancor_contract, bancorEth, bDigg, ethAmount, blockNumber).Int64())
-
+		bancorRes, err := FetchPoolStatsBancor(bancor_contract, bancorEth, bDigg, ethAmount, blockNumber)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
 		sushiEthBdiggRes, err := FetchPoolStatsUniswap(sushiEthBdiggPool, ethAmount, weth, bDigg, std_decimals, std_decimals, blockNumber)
 		if err != nil {
 			log.Error(err)
@@ -162,7 +177,7 @@ func main() {
 		delta := parsedEthOut - parsedEthIn
 		if delta > maxProfit {
 			maxProfit = delta
-			log.Info(fmt.Sprintf("found max profit %v ", delta))
+			log.Info(fmt.Sprintf("found max profit %v ", maxProfit))
 		}
 		time.Sleep(interval)
 		log.Info("------------------------------------------------------------------------------------------")
@@ -180,23 +195,28 @@ func parseDecimalsFromFloat(num *big.Float, decimals float64) float64 {
 	return parsed
 }
 
-func FetchPoolStatsBancor(bancor_contract common.Address, from common.Address, to common.Address, amount *big.Int, blockNumber *big.Int) *big.Int {
+func FetchPoolStatsBancor(bancor_contract common.Address, from common.Address, to common.Address, amount *big.Int, blockNumber *big.Int) (*big.Float, error) {
 
 	opts := &bind.CallOpts{BlockNumber: blockNumber, Context: context.TODO()}
 	bancor_caller, err := bancor.NewBancorCaller(bancor_contract, Client)
 	if err != nil {
-		log.Panic(fmt.Sprintf("Failed to create bancor caller: %v\n", err))
+		return big.NewFloat(0), fmt.Errorf("failed to create bancor caller: %v", err)
+
 	}
 	path, err := bancor_caller.ConversionPath(opts, from, to)
 	if err != nil {
-		log.Panic(fmt.Sprintf("Failed to get conversion path: %v\n", err))
+		log.Panic(fmt.Sprintf("failed to get conversion path: %v\n", err))
+		return big.NewFloat(0), fmt.Errorf("Failed to get conversion path: %v", err)
+
 	}
 
 	bancorRes, err := bancor_caller.RateByPath(opts, path, amount)
 	if err != nil {
-		log.Panic(fmt.Sprintf("Failed to get rate for path: %v\n", err))
+		return big.NewFloat(0), fmt.Errorf("failed to get rate for path: %v", err)
+
 	}
-	return bancorRes
+
+	return new(big.Float).SetInt64(bancorRes.Int64()), nil
 }
 
 // amount - the amount of token0 to send
