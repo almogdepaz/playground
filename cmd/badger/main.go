@@ -93,7 +93,7 @@ func main() {
 			log.Panic(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
 		}
 
-		log.Println(fmt.Sprintf("supply %v balance %v price %v price2 %v", supply, balance, price))
+		log.Println(fmt.Sprintf("supply %v balance %v price %v", supply, balance, price))
 
 		parsedSharePrice := big.NewInt(price.Int64() / int64(1e18))
 		log.Println(fmt.Sprintf("bDIGG share price %v", parsedSharePrice))
@@ -118,7 +118,7 @@ func main() {
 		uniEthRes := FetchPoolStatsUniswap(uniEthWbtcPool, wbtcRes, wbtc, weth, wbtc_decimals, std_decimals, blockNumber)
 		sushiEthRes := FetchPoolStatsUniswap(sushiEthWbtcPool, wbtcRes, wbtc, weth, wbtc_decimals, std_decimals, blockNumber)
 		log.Println(fmt.Sprintf("Uniswap ETH/WBTC %v wbtc in %v eth out", parseDecimalsFromInt(wbtcRes, std_decimals), parseDecimalsFromFloat(uniEthRes, std_decimals)))
-		log.Println(fmt.Sprintf("Sushiswap ETH/WBTC  %v wbtc in %v eth out %v", parseDecimalsFromInt(wbtcRes, std_decimals), parseDecimalsFromFloat(sushiEthRes, std_decimals)))
+		log.Println(fmt.Sprintf("Sushiswap ETH/WBTC  %v wbtc in %v eth out", parseDecimalsFromInt(wbtcRes, std_decimals), parseDecimalsFromFloat(sushiEthRes, std_decimals)))
 		ethRes := new(big.Int)
 		if uniEthRes.Cmp(sushiEthRes) < 0 {
 			sushiWbtcRes.Int(ethRes)
