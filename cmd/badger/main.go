@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -214,11 +213,11 @@ func FetchPoolStatsUniswap(pool common.Address, amount_in *big.Int, in common.Ad
 	}
 	pair, err := uniswap.NewUniswapv2pairCaller(pool, Client)
 	if err != nil {
-		return big.NewFloat(0), errors.New(fmt.Sprintf("Failed to instantiate pair caller: %v\n"))
+		return big.NewFloat(0), fmt.Errorf("failed to instantiate pair caller:  %v", err)
 	}
 	amount1, err := uniswap.GetExchangeAmount(pair, new(big.Float).SetInt(amount_in), in, out, blockNumber)
 	if err != nil {
-		return big.NewFloat(0), errors.New(fmt.Sprintf("Failed to get exchange amount: %v\n", err))
+		return big.NewFloat(0), fmt.Errorf("failed to get exchange amount:  %v", err)
 	}
 	return amount1, nil
 }
