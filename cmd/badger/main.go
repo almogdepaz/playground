@@ -165,7 +165,7 @@ func main() {
 		log.Info(fmt.Sprintf("Sushiswap ETH/WBTC  %v wbtc in %v eth out", parseDecimalsFromInt(wbtcRes, std_decimals), parseDecimalsFromFloat(sushiEthRes, std_decimals)))
 		ethRes := new(big.Int)
 		if uniEthRes.Cmp(sushiEthRes) < 0 {
-			sushiWbtcRes.Int(ethRes)
+			sushiEthRes.Int(ethRes)
 		} else {
 			uniEthRes.Int(ethRes)
 		}
