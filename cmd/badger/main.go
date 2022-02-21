@@ -205,7 +205,6 @@ func FetchPoolStatsBancor(bancor_contract common.Address, from common.Address, t
 	}
 	path, err := bancor_caller.ConversionPath(opts, from, to)
 	if err != nil {
-		log.Panic(fmt.Sprintf("failed to get conversion path: %v\n", err))
 		return big.NewFloat(0), fmt.Errorf("Failed to get conversion path: %v", err)
 
 	}
@@ -213,7 +212,6 @@ func FetchPoolStatsBancor(bancor_contract common.Address, from common.Address, t
 	bancorRes, err := bancor_caller.RateByPath(opts, path, amount)
 	if err != nil {
 		return big.NewFloat(0), fmt.Errorf("failed to get rate for path: %v", err)
-
 	}
 
 	return new(big.Float).SetInt64(bancorRes.Int64()), nil
