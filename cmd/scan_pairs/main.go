@@ -5,21 +5,18 @@ import (
 	"fmt"
 	"log"
 	"math/big"
-	"price_monitor/erc20"
-	"price_monitor/uniswap"
-	"price_monitor/util"
+	"playground/bindings/erc20"
+	"playground/bindings/uniswap"
+
+	"playground/util"
 	"regexp"
+	"runtime"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
+
 	"github.com/shopspring/decimal"
 )
-
-type MyClient struct {
-	*ethclient.Client
-}
 
 const node = "https://mainnet.infura.io/v3/093f1d19defd46248d24aa7e734ea203"
 const uniswapFactory = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
@@ -28,28 +25,10 @@ const decimals = 18
 
 var reg = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
 
-var Client MyClient
+var cl *util.MyClient
 
 func init() {
-	Client = MyClient{util.GetClient(node)}
-}
-
-func (cl MyClient) getBlock(blockId big.Int) (*types.Block, error) {
-	return cl.BlockByNumber(context.Background(), &blockId)
-
-}
-
-func (cl MyClient) getAccountBalance(address string) (*big.Int, error) {
-	return cl.BalanceAt(context.Background(), common.HexToAddress(address), nil)
-}
-
-func (cl MyClient) checkIsContract(address string) (bool, error) {
-	bytecode, err := Client.CodeAt(context.Background(), common.HexToAddress(address), nil) // nil is latest block
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return len(bytecode) > 0, nil
+	cl = util.GetClient(node)
 }
 
 func main() {
@@ -70,7 +49,7 @@ func main() {
 	// 	log.Panic("invalid address")
 	// }
 
-	var lps []uniswap.LP
+	var lps []LP
 	account := ""
 	err := util.ReadGob("./uni_listings.gob", &lps)
 	if err != nil {
@@ -118,7 +97,7 @@ func fetchAndPersist(index int) {
 	if index > 0 {
 		fmt.Println(fmt.Sprintf("starting from index %d", index))
 	}
-	lps, err := uniswap.PullDataFromUniswap(Client.Client, index, &bind.CallOpts{Context: context.TODO()}, uniswapFactory, node)
+	lps, err := PullDataFromUniswap(cl, index, &bind.CallOpts{Context: context.TODO()}, uniswapFactory, node)
 	if err != nil {
 		panic("failed pulling token data from uniswap contract")
 	}
@@ -132,7 +111,7 @@ func fetchAndPersist(index int) {
 }
 
 func tokenStats(tokenAddress common.Address, account string) *erc20.TokenBalance {
-	instance, err := erc20.New(Client.Client, tokenAddress.String(), account)
+	instance, err := erc20.New(cl.Client, tokenAddress.String(), account)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -154,11 +133,107 @@ func printStats(instance *erc20.TokenBalance) {
 
 func ethBalance(account string) (*big.Int, error) {
 	// print eth balance
-	bal, err := Client.getAccountBalance(account)
+	bal, err := cl.GetAccountBalance(account)
 	if err != nil {
 		log.Panic("failed fetching balance\n", err)
 	}
 
 	fmt.Printf("\n%s eth balance is %v", account, util.ToDecimal(bal, decimals))
 	return bal, err
+}
+
+type LP struct {
+	Lp common.Address
+	T0 common.Address
+	T1 common.Address
+}
+
+func PullDataFromUniswap(cl *util.MyClient, index int, op *bind.CallOpts, factory string, node string) ([]LP, error) {
+	var err error
+
+	lpAddress, err := GetAllPairs(cl, index, op, factory, node)
+	if err != nil {
+		return nil, err
+	}
+
+	lps, err := GetPairMeta(cl, lpAddress, op)
+
+	return lps, err
+}
+
+func GetPairMeta(cl *util.MyClient, pairs []common.Address, op *bind.CallOpts) ([]LP, error) {
+	var err error
+
+	lps := []LP{}
+	for i, tk := range pairs {
+		pair, err := uniswap.NewUniswapv2pairCaller(tk, cl)
+		if err != nil {
+			log.Println(fmt.Sprintf("Failed to instantiate pair caller: %v\n", err))
+			return nil, err
+		}
+
+		t0, err := pair.Token0(op)
+		if err != nil {
+			log.Println(fmt.Sprintf("Failed to fetch %s t0 : %v\n", tk, err))
+			return nil, err
+		}
+
+		t1, err := pair.Token1(op)
+		if err != nil {
+			log.Println(fmt.Sprintf("Failed to fetch %s t1 : %v\n", tk, err))
+			return nil, err
+		}
+
+		lps = append(lps, LP{tk, t0, t1})
+
+		fmt.Printf("\nGetPairMeta %d out of %d", i, len(pairs))
+	}
+	return lps, err
+}
+
+func GetAllPairs(cl *util.MyClient, index int, op *bind.CallOpts, factory string, node string) ([]common.Address, error) {
+	var err error
+	caller, err := uniswap.NewUniswapv2factoryCaller(common.HexToAddress(factory), cl)
+	if err != nil {
+		log.Println(fmt.Sprintf("Failed to instantiate a token contract: %v\n", err), false)
+		return nil, err
+	}
+	ln, err := caller.AllPairsLength(op)
+	if err != nil {
+		panic(err)
+	}
+
+	c := make(chan int64)
+	resChan := make(chan common.Address)
+	for i := 0; i < runtime.GOMAXPROCS(0); i++ {
+		go pairWorker(cl, c, resChan, ln, op, factory, node)
+	}
+
+	go func() {
+		for i := int64(index); i < ln.Int64(); i++ {
+			c <- i
+		}
+	}()
+
+	var lps []common.Address
+	for addr := range resChan {
+		lps = append(lps, addr)
+		fmt.Printf("\nGetAllPairs %d out of %d", len(lps), ln.Int64())
+	}
+
+	return lps, nil
+}
+
+func pairWorker(cl *util.MyClient, c chan int64, resChan chan common.Address, ln *big.Int, op *bind.CallOpts, factory string, node string) {
+	caller, err := uniswap.NewUniswapv2factoryCaller(common.HexToAddress(factory), cl)
+	if err != nil {
+		log.Panic(fmt.Sprintf("Failed to instantiate a token contract: %v\n", err), false)
+	}
+	for i := range c {
+		tk, err := caller.AllPairs(op, big.NewInt(i))
+		if err != nil {
+			panic(err)
+		}
+		resChan <- tk
+	}
 }

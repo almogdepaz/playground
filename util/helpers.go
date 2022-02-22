@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"log"
+	"math"
 	"math/big"
 	"os"
 	"reflect"
@@ -15,18 +15,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/shopspring/decimal"
 	"golang.org/x/crypto/sha3"
 )
-
-func GetClient(node string) *ethclient.Client {
-	cl, err := ethclient.Dial(node)
-	if err != nil {
-		log.Panic("cannot connect to node", err)
-	}
-	return cl
-}
 
 // PublicKeyBytesToAddress ...
 func PublicKeyBytesToAddress(publicKey []byte) common.Address {
@@ -191,4 +182,14 @@ func printStats(instance interface{}) {
 		panic(err)
 	}
 	fmt.Printf("token balance is: %s\n", ToDecimal(tokenBalance.Balance, i).String())
+}
+
+func ParseDecimalsFromInt(num *big.Int, decimals float64) float64 {
+	return ParseDecimalsFromFloat(new(big.Float).SetInt(num), decimals)
+}
+
+func ParseDecimalsFromFloat(num *big.Float, decimals float64) float64 {
+	parsed, _ := num.Float64()
+	parsed = parsed / math.Pow(10, decimals)
+	return parsed
 }

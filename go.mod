@@ -1,4 +1,4 @@
-module price_monitor
+module playground
 
 go 1.17
 
